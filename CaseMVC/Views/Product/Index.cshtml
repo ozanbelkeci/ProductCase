@@ -1,0 +1,451 @@
+﻿@model IEnumerable<CaseMVC.Models.ProductModel>
+@{
+}
+
+<h2>Ürünler</h2>
+<br />
+<button type="button" class="btn btn-success" data-bs-toggle="modal" onclick="getCategories(1)" data-bs-target="#createModal">Yeni Ürün Ekle</button>
+<div class="row">
+    <div class="col-3">
+        <div class="mb-3">
+            <label for="recipient-name" class="col-form-label">Minimum değer</label>
+            <input type="text" class="form-control" id="minStock">
+        </div>
+    </div>
+    <div class="col-3">
+        <div class="mb-3">
+            <label for="recipient-name" class="col-form-label">Maksimum değer</label>
+            <input type="text" class="form-control" id="maxStock">
+        </div>        
+    </div>
+</div>
+<div class="row">
+</div>
+<table id="productTable" class="table table-hover mt-3">
+    <thead>
+        <tr>
+            <th class="d-none">Id</th>
+            <th>Ürün Adı</th>
+            <th>Kategori</th>
+            <th>Satış Durumu</th>
+            <th>Stok Adedi</th>
+            <th>#</th>
+        </tr>
+    </thead>
+    <tbody id="productTableBody" class="table-border-bottom-0">
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td class="d-none">@item.Id</td>
+                <td>@item.Name</td>
+                <td>@item.Category.Name</td>
+                @if (item.Stock > 200)
+                {
+                    <td><span class="badge rounded-pill bg-success">Satışta</span></td>
+                }
+                else
+                {
+                    <td><span class="badge rounded-pill bg-danger">Satışta Değil</span></td>
+                }
+                <td>@item.Stock</td>
+                <td>
+                    <div class="dropdown">
+                        <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">
+                            <i class="bx bx-dots-vertical-rounded"></i>
+                        </button>
+                        <div class="dropdown-menu">
+                            <a onclick="getProductById(@item.Id)" data-bs-toggle="modal" data-bs-target="#updateModal" class="dropdown-item"><i class="bx bx-edit-alt me-1"></i> Güncelle</a>
+                            <a onclick="deleteProduct(@item.Id)" class="dropdown-item"><i class="bx bx-trash me-1"></i> Sil</a>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<!-- Update Modal -->
+<div class="modal fade" id="updateModal" tabindex="-1" aria-labelledby="updateModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="updateModalLabel">Ürün</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="row">
+                        <div class="col">
+                            <div class="mb-3">
+                                <label for="recipient-name" class="col-form-label">Ürün Adı</label>
+                                <input type="text" class="form-control" id="upProductName">
+                            </div>
+                            <div class="mb-3">
+                                <label for="message-text" class="col-form-label">Açıklama</label>
+                                <textarea class="form-control" id="upDesc"></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="recipient-name" class="col-form-label">Stok Adedi</label>
+                                <input type="number" class="form-control" id="upStock" oninput="this.value = Math.round(this.value);">
+                            </div>
+                            <div class="mb-3">
+                                <label for="recipient-name" class="col-form-label">Kategori Adı</label>
+                                <select class="form-select" id="upCategory">
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+                <button onclick="updateProduct()" type="button" class="btn btn-primary">Güncelle</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Create Modal -->
+<div class="modal" id="createModal" tabindex="-1" aria-labelledby="createModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="createModalLabel">Ürün</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="mb-3 d-none">
+                        <label for="recipient-name" class="col-form-label">ID:</label>
+                        <input type="text" class="form-control" id="id">
+                    </div>
+                    <div class="mb-3">
+                        <label for="recipient-name" class="col-form-label">Ürün Adı</label>
+                        <input type="text" class="form-control" id="productName">
+                    </div>
+                    <div class="mb-3">
+                        <label for="message-text" class="col-form-label">Açıklama</label>
+                        <textarea class="form-control" id="desc"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="recipient-name" class="col-form-label">Stok Adedi</label>
+                        <input type="number" class="form-control" id="stock" oninput="this.value = Math.round(this.value);">
+                    </div>
+                    <div class="mb-3">
+                        <label for="recipient-name" class="col-form-label">Kategori Adı</label>
+                        <select class="form-select" id="category">
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Kapat</button>
+                <button onclick="createProduct()" type="button" class="btn btn-primary">Ekle</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script>
+    const minEl = document.querySelector('#minStock');
+    const maxEl = document.querySelector('#maxStock');
+
+    let table = new DataTable('#productTable');
+
+    // Custom range filtering function
+    table.search.fixed('range', function (searchStr, data, index) {
+        var min = parseInt(minEl.value, 10);
+        var max = parseInt(maxEl.value, 10);
+        var age = parseFloat(data[4]) || 0; // use data for the age column
+
+        if (
+            (isNaN(min) && isNaN(max)) ||
+            (isNaN(min) && age <= max) ||
+            (min <= age && isNaN(max)) ||
+            (min <= age && age <= max)
+        ) {
+            return true;
+        }
+
+        return false;
+    });
+
+    // Changes to the inputs will trigger a redraw to update the table
+    minEl.addEventListener('input', function () {
+        table.draw();
+    });
+    maxEl.addEventListener('input', function () {
+        table.draw();
+    });
+
+    function createProduct() {
+        var productName = $("#productName").val();
+        var desc = $("#desc").val();
+        var stock = parseInt($("#stock").val());
+        var category = parseInt($("#category").val());
+
+        var formData = new FormData();
+        formData.append("_name", productName);
+        formData.append("_desc", desc);
+        formData.append("_stock", stock);
+        formData.append("_categoryId", category);
+
+        $.ajax({
+            url: '@Url.Action("CreateProduct", "Product")',
+            type: 'POST',
+            dataType: 'json',
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function (data) {
+                if (data) {
+                    $(function () {
+                        $('#createModal').modal('toggle');
+                    });
+                    Swal.fire({
+                        title: "Başarılı!",
+                        text: "Ürün başarıyla eklendi.",
+                        icon: "success"
+                    });
+                    updateTable();
+                }
+                else {
+                    $(function () {
+                        $('#createModal').modal('toggle');
+                    });
+                    Swal.fire({
+                        title: "Hata!",
+                        text: "Bir şeyler ters gitti lütfen tekrar deneyiniz!",
+                        icon: "error"
+                    });
+
+                    return;
+                }
+            }
+        });
+    }
+
+    function getCategories(val, categoryId = null) {
+
+        $.ajax({
+            url: '@Url.Action("GetCategories", "Product")',
+            type: 'POST',
+            dataType: 'json',
+            success: function (data) {
+                if (data) {
+                    if (val === 1) {
+                        $("#category").empty();
+                        var trHtml = "";
+                        for (var item of data) {
+                            trHtml += '<option value="' + item.id + '">' + item.name + '</option>';
+                        }
+                        $("#category").append(trHtml);
+                    }
+                    if (val === 2 && categoryId !== null) {
+                        $("#upCategory").empty();
+                        var trHtml = "";
+                        for (var item of data) {
+                            if (item.id === categoryId)
+                                trHtml += '<option selected value="' + item.id + '">' + item.name + '</option>';
+                            else
+                                trHtml += '<option value="' + item.id + '">' + item.name + '</option>';
+
+                        }
+                        $("#upCategory").append(trHtml);
+                    }
+                }
+                else {
+
+                    Swal.fire({
+                        title: "Hata!",
+                        text: "Bir şeyler ters gitti lütfen tekrar deneyiniz!",
+                        icon: "error"
+                    });
+
+                    return;
+                }
+            }
+        });
+    }
+
+    function updateTable() {
+        $.ajax({
+            url: '@Url.Action("UpdateTable", "Product")',
+            type: 'POST',
+            dataType: 'json',
+            success: function (data) {
+                if (data) {
+                    $("#productTableBody").empty();
+                    var trHtml = "";
+                    for (var item of data) {
+                        trHtml += '<tr>';
+                        trHtml += '    <td class="d-none"> ' + item.id + '</td>';
+                        trHtml += '        <td> ' + item.name + '</td>'
+                        trHtml += '        <td> ' + item.category.name + '</td>'
+                        if (item.stock > 200)
+                            trHtml += '<td><span class="badge rounded-pill bg-success">Satışta</span></td>'
+                        else
+                            trHtml += '<td><span class="badge rounded-pill bg-danger">Satışta Değil</span></td>'
+                        trHtml += '        <td> ' + item.stock + '</td>'
+                        trHtml += '        <td>'
+                        trHtml += '        <div class="dropdown">'
+                        trHtml += '            <button type="button" class="btn p-0 dropdown-toggle hide-arrow" data-bs-toggle="dropdown">'
+                        trHtml += '                <i class="bx bx-dots-vertical-rounded" > </i>'
+                        trHtml += '            </button>'
+                        trHtml += '            <div class="dropdown-menu">'
+                        trHtml += '                 <a onclick="getProductById(' + item.id + ')" data-bs-toggle="modal" data-bs-target="#updateModal" class="dropdown-item" > <i class="bx bx-edit-alt me-1"> </i>Edit</a>'
+                        trHtml += '                 <a onclick="deleteProduct(' + item.id + ')" class="dropdown-item" > <i class="bx bx-trash me-1" > </i> Delete</a>'
+                        trHtml += '            </div>'
+                        trHtml += '        </div>'
+                        trHtml += '     </td>'
+                        trHtml += '</tr>';
+                    }
+                    $("#productTableBody").append(trHtml);
+                }
+                else {
+                    Swal.fire({
+                        title: "Hata!",
+                        text: "Tablo yüklenirken bir şeyler ters gitti lütfen tekrar deneyiniz!",
+                        icon: "error"
+                    });
+
+                    return;
+                }
+            }
+        });
+    }
+
+    function deleteProduct(_id) {
+        Swal.fire({
+            title: "Seçtiğiniz ürün silinecektir. Onaylıyor musunuz?",
+            text: "Bunu geri alamazsınız!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#3085d6",
+            cancelButtonColor: "#d33",
+            confirmButtonText: "Evet, sil!",
+            cancelButtonText: "Kapat"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: '@Url.Action("DeleteProduct", "Product")',
+                    type: 'POST',
+                    dataType: 'json',
+                    data: {
+                        "_id": _id
+                    },
+                    success: function (data) {
+                        if (data) {
+                            Swal.fire({
+                                title: "Silindi!",
+                                text: "Ürün başarıyla silindi.",
+                                icon: "success"
+                            });
+                            updateTable();
+                        }
+                        else {
+                            $(function () {
+                                $('#modal').modal('toggle');
+                            });
+                            Swal.fire({
+                                title: "Hata!",
+                                text: "Bir şeyler ters gitti lütfen tekrar deneyiniz!",
+                                icon: "error"
+                            });
+
+                            return;
+                        }
+                    }
+                });
+            }
+        });
+
+    }
+
+    function getProductById(_id) {
+        $.ajax({
+            url: '@Url.Action("GetProductById", "Product")',
+            type: 'POST',
+            dataType: 'json',
+            data: {
+                "_id": _id
+            },
+            success: function (data) {
+                if (data) {
+                    console.log(data);
+                    $("#id").val(data.id);
+                    $("#upProductName").val(data.name);
+                    $("#upDesc").val(data.description);
+                    $("#upStock").val(data.stock);
+
+                    getCategories(2, data.categoryId);
+
+                }
+                else {
+                    $(function () {
+                        $('#modal').modal('toggle');
+                    });
+                    Swal.fire({
+                        title: "Hata!",
+                        text: "Bir şeyler ters gitti lütfen tekrar deneyiniz!",
+                        icon: "error"
+                    });
+
+                    return;
+                }
+            }
+        });
+    }
+
+    function updateProduct() {
+        var id = $("#id").val();
+        var productName = $("#upProductName").val();
+        var desc = $("#upDesc").val();
+        var stock = $("#upStock").val();
+        var category = parseInt($("#upCategory").val());
+
+        var formData = new FormData();
+        formData.append("_id", id);
+        formData.append("_name", productName);
+        formData.append("_desc", desc);
+        formData.append("_stock", stock);
+        formData.append("_categoryId", category);
+
+        $.ajax({
+            url: '@Url.Action("UpdateProduct", "Product")',
+            type: 'POST',
+            dataType: 'json',
+            data: formData,
+            contentType: false,
+            processData: false,
+            success: function (data) {
+                if (data) {
+                    $(function () {
+                        $('#updateModal').modal('toggle');
+                    });
+                    Swal.fire({
+                        title: "Başarılı!",
+                        text: "Ürün başarıyla güncellendi.",
+                        icon: "success"
+                    });
+                    updateTable();
+                }
+                else {
+                    $(function () {
+                        $('#updateModal').modal('toggle');
+                    });
+                    Swal.fire({
+                        title: "Hata!",
+                        text: "Bir şeyler ters gitti lütfen tekrar deneyiniz!",
+                        icon: "error"
+                    });
+
+                    return;
+                }
+            }
+        });
+    }
+
+</script>
